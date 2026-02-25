@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E-Commerce Order Fulfilment — Process Flow | Vishnuvardhan Allampalli</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0D1B2A; --navy2: #1B2D45; --accent: #C8A96E;
+    --blue: #2563EB; --green: #16A34A; --red: #DC2626; --purple: #7C3AED; --orange: #EA580C;
+    --gray: #F8FAFC; --border: #E2E8F0; --text: #1E293B; --muted: #64748B;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:#F1F5F9; color:var(--text); }
+
+  header {
+    background:var(--navy); padding:1.2rem 2rem;
+    display:flex; align-items:center; justify-content:space-between;
+    border-bottom:3px solid var(--accent);
+  }
+  .doc-title { color:white; font-size:1.1rem; font-weight:600; }
+  .doc-meta { color:rgba(255,255,255,0.5); font-size:0.78rem; }
+  .doc-badge { background:rgba(200,169,110,0.2); border:1px solid var(--accent); color:var(--accent); font-size:0.72rem; font-weight:600; padding:0.3rem 0.8rem; border-radius:100px; letter-spacing:0.05em; }
+
+  .canvas { padding:2rem; max-width:1400px; margin:0 auto; }
+
+  .diagram-title { font-size:1.4rem; font-weight:700; color:var(--navy); margin-bottom:0.3rem; }
+  .diagram-sub { font-size:0.88rem; color:var(--muted); margin-bottom:2rem; }
+
+  /* Legend */
+  .legend { display:flex; gap:1.5rem; flex-wrap:wrap; margin-bottom:2rem; background:white; padding:1rem 1.5rem; border-radius:10px; border:1px solid var(--border); }
+  .legend-item { display:flex; align-items:center; gap:0.5rem; font-size:0.78rem; color:var(--muted); font-weight:500; }
+  .legend-box { width:16px; height:16px; border-radius:4px; }
+  .legend-diamond { width:14px; height:14px; transform:rotate(45deg); }
+
+  /* Swimlane container */
+  .swimlane-wrap { background:white; border-radius:14px; border:1px solid var(--border); overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.06); }
+
+  .lane-row { display:grid; grid-template-columns:120px 1fr; border-bottom:1px solid var(--border); min-height:140px; }
+  .lane-row:last-child { border-bottom:none; }
+
+  .lane-label {
+    background:var(--navy); display:flex; align-items:center; justify-content:center;
+    padding:1rem; border-right:3px solid var(--accent);
+  }
+  .lane-label span {
+    font-size:0.75rem; font-weight:700; color:white; text-transform:uppercase;
+    letter-spacing:0.1em; writing-mode:vertical-rl; text-orientation:mixed;
+    transform:rotate(180deg);
+  }
+
+  .lane-content { padding:1.5rem 2rem; display:flex; align-items:center; gap:0; position:relative; }
+
+  /* SHAPES */
+  .node { position:relative; display:flex; flex-direction:column; align-items:center; flex-shrink:0; }
+  .node-box {
+    background:white; border:2px solid var(--border); border-radius:8px;
+    padding:0.6rem 0.9rem; text-align:center; font-size:0.72rem; font-weight:600;
+    color:var(--text); min-width:110px; max-width:120px; line-height:1.4;
+    box-shadow:0 2px 8px rgba(0,0,0,0.06); cursor:default;
+    transition:transform 0.15s, box-shadow 0.15s;
+  }
+  .node-box:hover { transform:translateY(-2px); box-shadow:0 6px 16px rgba(0,0,0,0.12); }
+
+  .node-box.start, .node-box.end {
+    border-radius:100px; background:var(--navy); color:white; border-color:var(--navy); min-width:80px;
+  }
+  .node-box.end { background:var(--green); border-color:var(--green); }
+  .node-box.end-fail { background:var(--red); border-color:var(--red); }
+
+  .node-box.blue { border-color:#BFDBFE; background:#EFF6FF; color:#1D4ED8; }
+  .node-box.green { border-color:#BBF7D0; background:#F0FDF4; color:#15803D; }
+  .node-box.orange { border-color:#FED7AA; background:#FFF7ED; color:#C2410C; }
+  .node-box.purple { border-color:#DDD6FE; background:#F5F3FF; color:#6D28D9; }
+  .node-box.yellow { border-color:#FEF08A; background:#FEFCE8; color:#A16207; }
+  .node-box.red { border-color:#FECACA; background:#FEF2F2; color:#B91C1C; }
+
+  .diamond-wrap { width:90px; height:90px; position:relative; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+  .diamond {
+    width:72px; height:72px; transform:rotate(45deg);
+    background:#FFFBEB; border:2px solid #F59E0B;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 2px 8px rgba(0,0,0,0.06);
+    transition:transform 0.15s;
+  }
+  .diamond:hover { transform:rotate(45deg) scale(1.05); }
+  .diamond span { transform:rotate(-45deg); font-size:0.62rem; font-weight:700; color:#92400E; text-align:center; line-height:1.3; max-width:52px; }
+
+  /* Arrows */
+  .arrow { display:flex; align-items:center; color:var(--muted); flex-shrink:0; }
+  .arrow-line { height:2px; background:#CBD5E1; flex:1; min-width:20px; position:relative; }
+  .arrow-line::after { content:'▶'; position:absolute; right:-6px; top:50%; transform:translateY(-50%); font-size:0.6rem; color:#94A3B8; }
+  .arrow-label { font-size:0.62rem; color:var(--muted); font-weight:600; position:absolute; top:-14px; left:50%; transform:translateX(-50%); white-space:nowrap; background:white; padding:0 4px; }
+
+  .arrow-down { display:flex; flex-direction:column; align-items:center; color:#94A3B8; height:30px; }
+  .arrow-down-line { width:2px; flex:1; background:#CBD5E1; }
+  .arrow-down::after { content:'▼'; font-size:0.55rem; color:#94A3B8; }
+
+  .node-label { font-size:0.62rem; color:var(--muted); margin-top:0.4rem; text-align:center; max-width:120px; font-weight:500; }
+
+  /* annotation */
+  .annotation {
+    position:absolute; right:1.5rem; top:50%; transform:translateY(-50%);
+    background:#FFFBEB; border:1px solid #FEF08A; border-radius:8px;
+    padding:0.6rem 1rem; font-size:0.72rem; color:#92400E; max-width:180px; line-height:1.5;
+  }
+  .annotation::before { content:'💡'; margin-right:4px; }
+
+  /* stats bar */
+  .stats-bar { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-top:2rem; }
+  .stat { background:white; border-radius:10px; border:1px solid var(--border); padding:1.2rem; text-align:center; }
+  .stat-val { font-size:1.8rem; font-weight:700; color:var(--navy); font-family:'Inter',sans-serif; }
+  .stat-lbl { font-size:0.75rem; color:var(--muted); margin-top:0.2rem; }
+
+  /* metadata footer */
+  .doc-footer { margin-top:2rem; background:white; border-radius:10px; border:1px solid var(--border); padding:1.2rem 1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; }
+  .doc-footer-item { font-size:0.78rem; color:var(--muted); }
+  .doc-footer-item strong { color:var(--text); }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="doc-title">E-Commerce Order Fulfilment — Process Flow Diagram</div>
+    <div class="doc-meta">BA Deliverable · RetailX Digital Transformation · Jan 2025</div>
+  </div>
+  <div style="display:flex;gap:1rem;align-items:center">
+    <span class="doc-badge">PROCESS DESIGN</span>
+    <span class="doc-badge">v1.2 FINAL</span>
+  </div>
+</header>
+
+<div class="canvas">
+  <h2 class="diagram-title">Order Fulfilment — As-Is to To-Be Process Flow</h2>
+  <p class="diagram-sub">Swim-lane diagram showing end-to-end order processing across Customer, Platform, Payment, Warehouse, and Logistics actors · Analyst: Vishnuvardhan Allampalli</p>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-box" style="background:var(--navy)"></div>Start / End</div>
+    <div class="legend-item"><div class="legend-box" style="background:#EFF6FF;border:2px solid #BFDBFE"></div>System Process</div>
+    <div class="legend-item"><div class="legend-box" style="background:#F0FDF4;border:2px solid #BBF7D0"></div>Automated Step</div>
+    <div class="legend-item"><div class="legend-box" style="background:#FFF7ED;border:2px solid #FED7AA"></div>Manual Step</div>
+    <div class="legend-item"><div class="legend-box" style="background:#F5F3FF;border:2px solid #DDD6FE"></div>Third-Party</div>
+    <div class="legend-item"><div class="legend-diamond" style="background:#FFFBEB;border:2px solid #F59E0B"></div>Decision Gate</div>
+    <div class="legend-item"><div style="width:30px;height:2px;background:#CBD5E1;position:relative"><span style="position:absolute;right:-4px;top:-4px;font-size:8px;color:#94A3B8">▶</span></div>Flow</div>
+  </div>
+
+  <div class="swimlane-wrap">
+
+    <!-- Lane 1: Customer -->
+    <div class="lane-row">
+      <div class="lane-label"><span>Customer</span></div>
+      <div class="lane-content">
+        <div class="node"><div class="node-box start">START</div></div>
+        <div class="arrow"><div class="arrow-line" style="min-width:30px"></div></div>
+        <div class="node"><div class="node-box blue">Browse &amp; Search Products</div><div class="node-label">Faceted search + AI recs</div></div>
+        <div class="arrow"><div class="arrow-line" style="min-width:30px"></div></div>
+        <div class="node"><div class="node-box blue">Add to Cart</div><div class="node-label">Cart persists 30 days</div></div>
+        <div class="arrow"><div class="arrow-line" style="min-width:30px"></div></div>
+        <div class="node"><div class="node-box blue">Proceed to Checkout</div><div class="node-label">1-page checkout flow</div></div>
+        <div class="arrow"><div class="arrow-line" style="min-width:30px"></div></div>
+        <div class="node"><div class="node-box yellow">Enter Delivery &amp; Payment</div><div class="node-label">Guest or saved details</div></div>
+        <div class="arrow"><div class="arrow-line" style="min-width:30px"></div></div>
+        <div class="node"><div class="node-box blue">Review &amp; Confirm Order</div><div class="node-label">Order summary page</div></div>
+        <div class="annotation">Guest checkout enabled — no forced account creation (REQ-008)</div>
+      </div>
+    </div>
+
+    <!-- Lane 2: Platform -->
+    <div class="lane-row">
+      <div class="lane-label"><span>Platform</span></div>
+      <div class="lane-content" style="gap:0">
+        <div class="node"><div class="node-box green">Validate Cart Items</div><div class="node-label">Stock check + pricing</div></div>
+        <div class="arrow"><div class="arrow-line" style="min-width:24px"></div></div>
+        <div class="diamond-wrap"><div class="diamond"><span>Stock Available?</span></div></div>
+        <div class="arrow" style="flex-direction:column;position:relative;min-width:40px">
+          <div style="font-size:0.6rem;color:var(--green);font-weight:700;margin-bottom:2px">YES →</div>
+          <div class="arrow-line" style="min-width:34px"></div>
+          <div style="font-size:0.6rem;color:var(--red);font-weight:700;margin-top:2px;position:absolute;bottom:-18px;left:4px">NO ↓ Notify</div>
+        </div>
+        <div class="node"><div class="node-box green">Generate Order ID</div><div class="node-label">UUID assigned</div></div>
+        <div class="arrow"><div class="arrow-line" style="min-width:24px"></div></div>
+        <div class="node"><div class="node-box green">Send to Payment Gateway</div><div class="node-label">Tokenized request</div></div>
+        <div class="arrow"><div class="arrow-line" style="min-width:24px"></div></div>
+        <div class="diamond-wrap"><div class="diamond"><span>Payment Auth?</span></div></div>
+        <div class="arrow" style="min-width:36px">
+          <div class="arrow-line" style="min-width:30px"></div>
+        </div>
+        <div class="node"><div class="node-box green">Create Order Record</div><div class="node-label">Status: CONFIRMED</div></div>
+        <div class="arrow"><div class="arrow-line" style="min-width:24px"></div></div>
+        <div class="node"><div class="node-box green">Send Confirmation Email + SMS</div><div class="node-label">Within 60s via Twilio</div></div>
+      </div>
+    </div>
+
+    <!-- Lane 3: Payment -->
+    <div class="lane-row">
+      <div class="lane-label"><span>Payment</span></div>
+      <div class="lane-content">
+        <div style="flex:1"></div>
+        <div class="node"><div class="node-box purple">Stripe / PayPal Gateway</div><div class="node-label">PCI-DSS Level 1</div></div>
+        <div class="arrow"><div class="arrow-line" style="min-width:30px"></div></div>
+        <div class="node"><div class="node-box purple">Tokenize Card Data</div><div class="node-label">No raw PAN stored</div></div>
+        <div class="arrow"><div class="arrow-line" style="min-width:30px"></div></div>
+        <div class="diamond-wrap"><div class="diamond"><span>Fraud Check Pass?</span></div></div>
+        <div class="arrow"><div class="arrow-line" style="min-width:30px"></div></div>
+        <div class="node"><div class="node-box purple">Authorize &amp; Capture</div><div class="node-label">Real-time auth</div></div>
+        <div class="arrow"><div class="arrow-line" style="min-width:30px"></div></div>
+        <div class="node"><div class="node-box purple">Return Auth Token</div><div class="node-label">To platform API</div></div>
+        <div class="annotation" style="right:1rem">3DS2 used for high-value orders > $500 (REQ-009)</div>
+      </div>
+    </div>
+
+    <!-- Lane 4: Warehouse -->
+    <div class="lane-row">
+      <div class="lane-label"><span>Warehouse</span></div>
+      <div class="lane-content">
+        <div style="flex:1"></div>
+        <div class="node"><div class="node-box orange">Receive Pick List</div><div class="node-label">Auto-generated</div></div>
+        <div class="arrow"><div class="arrow-line" style="min-width:30px"></div></div>
+        <div class="node"><div class="node-box orange">Pick &amp; Pack Items</div><div class="node-label">WMS scan verification</div></div>
+        <div class="arrow"><div class="arrow-line" style="min-width:30px"></div></div>
+        <div class="diamond-wrap"><div class="diamond"><span>All Items Found?</span></div></div>
+        <div class="arrow"><div class="arrow-line" style="min-width:30px"></div></div>
+        <div class="node"><div class="node-box orange">Generate Shipping Label</div><div class="node-label">Carrier API call</div></div>
+        <div class="arrow"><div class="arrow-line" style="min-width:30px"></div></div>
+        <div class="node"><div class="node-box orange">Update Inventory</div><div class="node-label">Real-time stock update</div></div>
+        <div class="arrow"><div class="arrow-line" style="min-width:30px"></div></div>
+        <div class="node"><div class="node-box orange">Dispatch to Carrier</div><div class="node-label">Status: DISPATCHED</div></div>
+      </div>
+    </div>
+
+    <!-- Lane 5: Logistics -->
+    <div class="lane-row">
+      <div class="lane-label"><span>Logistics</span></div>
+      <div class="lane-content">
+        <div style="flex:1.5"></div>
+        <div class="node"><div class="node-box purple">Carrier Scans Package</div><div class="node-label">Webhook → Platform</div></div>
+        <div class="arrow"><div class="arrow-line" style="min-width:30px"></div></div>
+        <div class="node"><div class="node-box green">Real-Time Tracking Update</div><div class="node-label">Customer notified</div></div>
+        <div class="arrow"><div class="arrow-line" style="min-width:30px"></div></div>
+        <div class="node"><div class="node-box blue">Delivery Attempt</div><div class="node-label">Signature optional</div></div>
+        <div class="arrow"><div class="arrow-line" style="min-width:30px"></div></div>
+        <div class="diamond-wrap"><div class="diamond"><span>Delivered?</span></div></div>
+        <div class="arrow"><div class="arrow-line" style="min-width:30px"></div></div>
+        <div class="node"><div class="node-box green">Mark Order DELIVERED</div><div class="node-label">Auto-close in 7 days</div></div>
+        <div class="arrow"><div class="arrow-line" style="min-width:30px"></div></div>
+        <div class="node"><div class="node-box end">END ✓</div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-val" style="color:var(--blue)">5</div>
+      <div class="stat-lbl">Swim Lanes / Actors</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" style="color:var(--green)">24</div>
+      <div class="stat-lbl">Process Steps</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" style="color:var(--orange)">5</div>
+      <div class="stat-lbl">Decision Gates</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" style="color:var(--purple)">3</div>
+      <div class="stat-lbl">Third-Party Integrations</div>
+    </div>
+  </div>
+
+  <!-- Document footer -->
+  <div class="doc-footer">
+    <div class="doc-footer-item"><strong>Document:</strong> Order Fulfilment Process Flow v1.2</div>
+    <div class="doc-footer-item"><strong>Project:</strong> RetailX E-Commerce Redesign</div>
+    <div class="doc-footer-item"><strong>Analyst:</strong> Vishnuvardhan Allampalli</div>
+    <div class="doc-footer-item"><strong>Date:</strong> January 2025</div>
+    <div class="doc-footer-item"><strong>Status:</strong> <span style="color:var(--green);font-weight:600">✅ Approved</span></div>
+    <div class="doc-footer-item"><strong>Tool:</strong> Process Design · BA Deliverable</div>
+  </div>
+</div>
+
+</body>
+</html>

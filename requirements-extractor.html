@@ -157,7 +157,7 @@
   <div class="header-inner">
     <div class="header-left">
       <a href="#" class="back-link">← Back to Portfolio</a>
-      <div class="header-tag">🤖 AI-Powered · Claude API</div>
+      <div class="header-tag">🤖 AI-Powered</div>
       <h1 class="header-title">AI Requirements <span>Extractor</span></h1>
       <p class="header-desc">Paste raw meeting notes or workshop transcripts — Claude extracts structured requirements, user stories, acceptance criteria, and open questions instantly.</p>
     </div>
@@ -359,7 +359,7 @@ async function extractRequirements() {
 
   btn.disabled = true;
   spinner.style.display = 'block';
-  statusText.textContent = 'Analysing with Claude AI...';
+  statusText.textContent = 'Analysing with AI...';
   errorMsg.style.display = 'none';
   document.getElementById('results').style.display = 'none';
 
@@ -382,7 +382,7 @@ Return ONLY valid JSON with this exact structure:
 Extract everything mentioned. Be specific. Do not invent requirements not implied by the notes. Return only the JSON object, no markdown, no explanation.`;
 
   try {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
+    const response = await fetch("https://late-lake-dc84.analyst-allampalli.workers.dev", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

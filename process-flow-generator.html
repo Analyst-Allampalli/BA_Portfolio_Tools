@@ -324,6 +324,15 @@ Rules:
     }
 
     const data = await response.json();
+
+    if (data.error) {
+      throw new Error(data.error.message || JSON.stringify(data.error));
+    }
+
+    if (!data.content || !Array.isArray(data.content)) {
+      throw new Error('Unexpected API response: ' + JSON.stringify(data).substring(0, 200));
+    }
+
     let text = data.content.map(b => b.text || '').join('');
     text = text.replace(/```json|```/g, '').trim();
     const parsed = JSON.parse(text);
